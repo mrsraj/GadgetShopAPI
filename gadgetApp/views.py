@@ -235,6 +235,32 @@ def product_image_detail(request, pk):
         image.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
     
+    
+@api_view(['GET'])
+def latest_collection(request):
+    products = Product.objects.filter(is_latest=True)
+    serializer = ProductSerializer(products, many=True)
+    return Response(serializer.data)
+
+@api_view(['GET'])
+def best_sellers(request):
+    products = Product.objects.filter(is_best_seller=True)
+    serializer = ProductSerializer(products, many=True)
+    return Response(serializer.data)
+
+@api_view(['GET'])
+def new_arrivals(request):
+    products = Product.objects.filter(is_new_arrival=True)
+    serializer = ProductSerializer(products, many=True)
+    return Response(serializer.data)
+
+@api_view(['GET'])
+def accessories(request):
+    products = Product.objects.filter(is_accessory=True)
+    serializer = ProductSerializer(products, many=True)
+    return Response(serializer.data)
+
+    
 ## 4
 @api_view(['GET', 'POST'])
 def cart_list(request):
