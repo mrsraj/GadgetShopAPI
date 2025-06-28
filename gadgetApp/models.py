@@ -32,21 +32,14 @@ class Brand(models.Model):
 
 
 class Product(models.Model):
-    name = models.CharField(max_length=200)
-    description = models.TextField()
-    price = models.DecimalField(max_digits=10, decimal_places=2)
-    stock_quantity = models.IntegerField()
     category = models.ForeignKey('Category', on_delete=models.CASCADE)
     brand = models.ForeignKey('Brand', on_delete=models.CASCADE)
+    name = models.CharField(max_length=200)
+    description = models.TextField()
+    stock_quantity = models.IntegerField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-
-    # NEW FIELDS
-    is_latest = models.BooleanField(default=False)
-    is_best_seller = models.BooleanField(default=False)
-    is_new_arrival = models.BooleanField(default=False)
-    is_accessory = models.BooleanField(default=False)
-
+    
     def __str__(self):
         return self.name
 
@@ -57,7 +50,37 @@ class ProductImage(models.Model):
 
     def __str__(self):
         return f"Image for {self.product.name}"
+    
+class ProductVariant(models.Model):
+    product = models.ForeignKey(Product, related_name='variants', on_delete=models.CASCADE)
+    ram = models.CharField(max_length=50)         # 4GB, 8GB, 16GB, etc.
+    processor = models.CharField(max_length=50)   # i3, i5, i7
+    storage = models.CharField(max_length=50)     # 256GB, 512GB
+    
+class ProductPrice(models.Model):
+    product = models.ForeignKey(Product, related_name='prices', on_delete=models.CASCADE)
+    variant = models.ForeignKey(ProductVariant, related_name='prices', on_delete=models.CASCADE)
+    actual_price = models.DecimalField(max_digits=10, decimal_places=2)
+    offer_price = models.DecimalField(max_digits=10, decimal_places=2)
+    discount_percent = models.IntegerField()
+    bought_last_month = models.IntegerField(default=0)
+    rating = models.DecimalField(max_digits=3, decimal_places=1)  # 3.6
+    review_count = models.IntegerField(default=0)
+    
+class ProductSpecification(models.Model):
+    product = models.ForeignKey(Product, related_name='specs', on_delete=models.CASCADE)
+    key = models.CharField(max_length=100)
+    value = models.TextField()
+    
+class ProductPolicy(models.Model):  # Fixing name from ProductPlicy
+    product = models.ForeignKey(Product, related_name='policies', on_delete=models.CASCADE)
+    delivery_note = models.CharField(max_length=100)          # e.g., "7 Days Replacement"
+    delivery_charge = models.DecimalField(max_digits=6, decimal_places=2, default=0.00)  # e.g., 0 or 199.00
 
+    def __str__(self):
+        return f"{self.delivery_note} (₹{self.delivery_charge})"
+    
+##CART TABLE
 class Cart(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
