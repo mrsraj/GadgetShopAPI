@@ -91,6 +91,40 @@ class StudentOnlyView(APIView):
     
 ## new code
 
+@api_view(['GET'])
+def product_list(request):
+    try:
+        products = Product.objects.all()
+        if not products.exists():
+            return Response({"message": "No matching products found."}, status=status.HTTP_204_OK)
+
+        # Filters
+        product_id = request.GET.get('id')
+        name = request.GET.get('name')
+        brand = request.GET.get('brand')
+        
+        print("product_id = ",product_id)
+        print("name = ",name)
+        print("brand = ",brand)
+
+        if product_id:
+            products = products.filter(id=product_id)
+            print("id")
+        if name:
+            products = products.filter(name__icontains=name)
+            print("name")
+        if brand:
+            products = products.filter(brand__name__icontains=brand)
+            print("brand = ",products)
+
+        serializer = ProductSerializer(products, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    except Exception as e:
+        return Response({
+            "error": "Something went wrong while fetching products.",
+            "details": str(e)
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 ## 1
 @api_view(['GET', 'POST'])
@@ -160,19 +194,19 @@ def brand_detail(request, pk):
         brand.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 ## 3
-@api_view(['GET', 'POST'])
-def product_list(request):
-    if request.method == 'GET':
-        products = Product.objects.all()
-        serializer = ProductSerializer(products, many=True)
-        return Response(serializer.data)
+# @api_view(['GET', 'POST'])
+# def product_list(request):
+#     if request.method == 'GET':
+#         products = Product.objects.all()
+#         serializer = ProductSerializer(products, many=True)
+#         return Response(serializer.data)
     
-    elif request.method == 'POST':
-        serializer = ProductSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+#     elif request.method == 'POST':
+#         serializer = ProductSerializer(data=request.data)
+#         if serializer.is_valid():
+#             serializer.save()
+#             return Response(serializer.data, status=status.HTTP_201_CREATED)
+#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['GET', 'PUT', 'DELETE'])
