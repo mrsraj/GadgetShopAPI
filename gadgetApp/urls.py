@@ -56,6 +56,8 @@ urlpatterns = [
     
     path('product-images/', product_image_list, name='productimage-list'),
     path('product-images/<int:pk>/', product_image_detail, name='productimage-detail'),
+    
+    path('products/', product_list, name='product-list'),
 ]
 
 
