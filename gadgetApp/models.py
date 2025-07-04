@@ -17,68 +17,66 @@ class CustomUser(AbstractUser):
     
 ## project releted Model:-
 
-class Category(models.Model):
-    name = models.CharField(max_length=100)
-    parent = models.ForeignKey('self', null=True, blank=True, on_delete=models.SET_NULL)
-
-    def __str__(self):
-        return self.name
-
-class Brand(models.Model):
-    name = models.CharField(max_length=100)
-
-    def __str__(self):
-        return self.name
-
-
 class Product(models.Model):
-    category = models.ForeignKey('Category', on_delete=models.CASCADE)
-    brand = models.ForeignKey('Brand', on_delete=models.CASCADE)
+    category = models.CharField(max_length=100)
+    brand = models.CharField(max_length=100)
     name = models.CharField(max_length=200)
     description = models.TextField()
     stock_quantity = models.IntegerField()
+
+    # Variant-specific fields merged here
+    ram = models.CharField(max_length=50)         # 4GB, 8GB, etc.
+    processor = models.CharField(max_length=50)   # i3, i5, i7
+    storage = models.CharField(max_length=50)     # 256GB, 512GB, etc.
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
-    def __str__(self):
-        return self.name
-
-
-class ProductImage(models.Model):
-    product = models.ForeignKey(Product, related_name='images', on_delete=models.CASCADE)
-    image_url = models.URLField()  # or use ImageField if storing files
-
-    def __str__(self):
-        return f"Image for {self.product.name}"
-    
-class ProductVariant(models.Model):
-    product = models.ForeignKey(Product, related_name='variants', on_delete=models.CASCADE)
-    ram = models.CharField(max_length=50)         # 4GB, 8GB, 16GB, etc.
-    processor = models.CharField(max_length=50)   # i3, i5, i7
-    storage = models.CharField(max_length=50)     # 256GB, 512GB
-    
-class ProductPrice(models.Model):
-    product = models.ForeignKey(Product, related_name='prices', on_delete=models.CASCADE)
-    variant = models.ForeignKey(ProductVariant, related_name='prices', on_delete=models.CASCADE)
+    ## Price
     actual_price = models.DecimalField(max_digits=10, decimal_places=2)
     offer_price = models.DecimalField(max_digits=10, decimal_places=2)
     discount_percent = models.IntegerField()
-    bought_last_month = models.IntegerField(default=0)
-    rating = models.DecimalField(max_digits=3, decimal_places=1)  # 3.6
-    review_count = models.IntegerField(default=0)
+
+    def __str__(self):
+        return self.name
+
+    
+class ProductImage(models.Model):
+    product = models.ForeignKey('Product', related_name='images', on_delete=models.CASCADE)
+    image_file = models.ImageField(upload_to='product_images/', null=True, blank=True) #optional
+    image_url = models.URLField(null=True, blank=True)#optional
+
+    def __str__(self):
+        return f"Image for {self.product.name}"
+
     
 class ProductSpecification(models.Model):
     product = models.ForeignKey(Product, related_name='specs', on_delete=models.CASCADE)
     key = models.CharField(max_length=100)
     value = models.TextField()
     
-class ProductPolicy(models.Model):  # Fixing name from ProductPlicy
+class ProductPolicy(models.Model):  
     product = models.ForeignKey(Product, related_name='policies', on_delete=models.CASCADE)
     delivery_note = models.CharField(max_length=100)          # e.g., "7 Days Replacement"
     delivery_charge = models.DecimalField(max_digits=6, decimal_places=2, default=0.00)  # e.g., 0 or 199.00
 
     def __str__(self):
         return f"{self.delivery_note} (₹{self.delivery_charge})"
+    
+class AdditionalProduct(models.Model):
+    brand = models.CharField(max_length=50,null=True) 
+    ram = models.CharField(max_length=50)         # e.g., 4GB, 8GB
+    processor = models.CharField(max_length=50)   # e.g., i3, i5, i7
+    storage = models.CharField(max_length=50)     # e.g., 256GB, 512GB/ssd or hdd
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+
+    
+    
+# class ProductPrice(models.Model):
+#     product = models.ForeignKey(Product, related_name='prices', on_delete=models.CASCADE)
+#     actual_price = models.DecimalField(max_digits=10, decimal_places=2)
+#     offer_price = models.DecimalField(max_digits=10, decimal_places=2)
+#     discount_percent = models.IntegerField()
     
 ##CART TABLE
 class Cart(models.Model):
