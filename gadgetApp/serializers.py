@@ -116,3 +116,10 @@ class ProductSerializer(serializers.ModelSerializer):
             'created_at', 'updated_at',
             'images', 'specs', 'policies'
         ]
+
+
+## Set Image 
+class ProductImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductImage
+        fields = ['id', 'product', 'image_file', 'image_url']
