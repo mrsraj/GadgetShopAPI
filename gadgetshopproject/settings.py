@@ -154,3 +154,7 @@ CORS_ALLOWED_ORIGINS = [
 
 # Allow credentials if using authentication
 CORS_ALLOW_CREDENTIALS = True
+
+## For image
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
