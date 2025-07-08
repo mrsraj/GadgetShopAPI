@@ -101,6 +101,14 @@ class ProductSerializer(serializers.ModelSerializer):
             'created_at', 'updated_at',
             'images', 'specs', 'policies'
         ]
+        
+class ProductCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model=Product
+        fields = ['category', 'brand', 'name', 'description',
+            'stock_quantity', 'ram', 'processor', 'storage',
+            'actual_price', 'offer_price', 'discount_percent'
+        ]
 
 
 ## Set Image 
