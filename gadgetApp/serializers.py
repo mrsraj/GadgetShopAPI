@@ -69,21 +69,6 @@ class PaymentSerializer(serializers.ModelSerializer):
         fields = '__all__'
         
 
-class ProductImageSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ProductImage
-        fields = ['id', 'product', 'image_url']
-        
-# class ProductSerializer(serializers.ModelSerializer):
-#     images = ProductImageSerializer(many=True, read_only=True)
-
-#     class Meta:
-#         model = Product
-#         fields = ['id','name','description','price','stock_quantity','category','brand','created_at',
-#                   'updated_at',
-#             'images'  # nested images field
-#         ]
-
 
 ###New Special code for product:
 
