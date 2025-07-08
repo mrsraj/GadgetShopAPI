@@ -131,10 +131,10 @@ def product_detail(request, pk):
 
 @api_view(['POST'])
 def product_create(request):
-    serializer = ProductSerializer(data=request.data)
+    serializer = ProductCreateSerializer(data=request.data)
     if serializer.is_valid():
         product = serializer.save()
-        return Response(ProductSerializer(product).data, status=status.HTTP_201_CREATED)
+        return Response(ProductCreateSerializer(product).data, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
