@@ -22,6 +22,14 @@ urlpatterns = [
     path('products/<int:pk>/', views.product_detail, name='product-detail'),
     path('product-images/create/', views.create_product_image, name='product-image-create'),
     path('products/create/', views.product_create, name='product-create'),
+    
+    ## Wish list and add to cart
+    path('cart/', views.cart_list_create, name='cart-list-create'),
+    path('cart/<int:pk>/del', views.cart_delete, name='cart-delete'),
+
+    # Wishlist URLS
+    path('wishlist/', views.wishlist_list_create, name='wishlist-list-create'),
+    path('wishlist/<int:pk>/del', views.wishlist_delete, name='wishlist-delete'),
 ]
 
 

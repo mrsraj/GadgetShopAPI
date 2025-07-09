@@ -9,7 +9,7 @@ from .serializers import RegisterSerializer, LoginSerializer
 from django.contrib.auth import get_user_model
 
 ##New Code:---
-from rest_framework.decorators import api_view,parser_classes
+from rest_framework.decorators import api_view,parser_classes,permission_classes
 from rest_framework.response import Response
 from rest_framework import status
 from .models import *
@@ -146,3 +146,68 @@ def create_product_image(request):
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+## Cart Function
+
+@api_view(['GET', 'POST'])
+@permission_classes([IsAuthenticated])
+def cart_list_create(request):
+    if request.method == 'GET':
+        items = CartItem.objects.all()
+        serializer = CartItemSerializer(items, many=True)
+        return Response(serializer.data)
+    
+    elif request.method == 'POST':
+        serializer = CartItemSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def cart_delete(request, pk):
+    try:
+        item = CartItem.objects.get(pk=pk)
+    except CartItem.DoesNotExist:
+        return Response({'error': 'CartItem not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    item.delete()
+    return Response({'message': 'CartItem deleted'}, status=status.HTTP_204_NO_CONTENT)
+
+
+## WISH LIST VIEWS
+
+@api_view(['GET', 'POST'])
+@permission_classes([IsAuthenticated])
+def wishlist_list_create(request):
+    if request.method == 'GET':
+        items = Wishlist.objects.all()
+        serializer = WishlistSerializer(items, many=True)
+        return Response(serializer.data)
+    
+    elif request.method == 'POST':
+        serializer = WishlistSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated]) 
+def wishlist_delete(request, pk):
+    try:
+        item = Wishlist.objects.get(pk=pk)
+    except Wishlist.DoesNotExist:
+        return Response({'error': 'Wishlist item not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    # Optional: Ensure user can only delete their own wishlist
+    if item.user != request.user:
+        return Response({'error': 'Not authorized'}, status=status.HTTP_403_FORBIDDEN)
+
+    item.delete()
+    return Response({'message': 'Wishlist item deleted'}, status=status.HTTP_204_NO_CONTENT)

@@ -35,16 +35,19 @@ class LoginSerializer(serializers.Serializer):
 ## New Code 
 
 class CartItemSerializer(serializers.ModelSerializer):
+    product_name = serializers.CharField(source='product.name', read_only=True)
+
     class Meta:
         model = CartItem
-        fields = '__all__'
+        fields = ['id', 'user', 'product', 'product_name', 'quantity', 'created_at', 'updated_at']
 
-class CartSerializer(serializers.ModelSerializer):
-    items = CartItemSerializer(source='cartitem_set', many=True, read_only=True)
-    
+
+class WishlistSerializer(serializers.ModelSerializer):
+    product_name = serializers.CharField(source='product.name', read_only=True)
+
     class Meta:
-        model = Cart
-        fields = ['id', 'user', 'created_at', 'items']
+        model = Wishlist
+        fields = ['id', 'user', 'product', 'product_name', 'created_at']
 
 class AddressSerializer(serializers.ModelSerializer):
     class Meta:
