@@ -190,11 +190,20 @@ def wishlist_list_create(request):
         return Response(serializer.data)
     
     elif request.method == 'POST':
+        print("data=request.data = ", request.data)
         serializer = WishlistSerializer(data=request.data)
+
+        user = request.data.get('user')
+        product = request.data.get('product')
+
+        if Wishlist.objects.filter(user=user, product=product).exists():
+            return Response({"detail": "Product is already in the wishlist."}, status=status.HTTP_200_OK)
+
         if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+           serializer.save()
+           return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 
 @api_view(['DELETE'])
