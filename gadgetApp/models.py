@@ -83,11 +83,7 @@ class CartItem(models.Model):
     updated_at = models.DateTimeField(auto_now=True, blank=True)
 
     class Meta:
-        unique_together = ('user', 'product')
         ordering = ['-updated_at']
-
-    def __str__(self):
-        return f"{self.user.username} - {self.product.name} (x{self.quantity})"
 
 
 class Wishlist(models.Model):
@@ -96,11 +92,7 @@ class Wishlist(models.Model):
     created_at = models.DateTimeField(auto_now_add=True,blank=True)
 
     class Meta:
-        unique_together = ('user', 'product')
         ordering = ['-created_at']
-
-    def __str__(self):
-        return f"{self.user.username} - {self.product.name}"
     
 
 class Address(models.Model):
