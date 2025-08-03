@@ -11,7 +11,7 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['username', 'email', 'password', 'role']
+        fields = ['first_name', 'username', 'password', 'role']
         extra_kwargs = {'password': {'write_only': True}}
 
     def create(self, validated_data):
@@ -36,18 +36,14 @@ class LoginSerializer(serializers.Serializer):
 
 class CartItemSerializer(serializers.ModelSerializer):
     product_name = serializers.CharField(source='product.name', read_only=True)
+    price = serializers.CharField(source='product.actual_price', read_only=True)
 
     class Meta:
         model = CartItem
-        fields = ['id', 'user', 'product', 'product_name', 'quantity', 'created_at', 'updated_at']
+        fields = ['id', 'user', 'product', 'product_name','price', 'quantity', 'created_at', 'updated_at']
 
 
-class WishlistSerializer(serializers.ModelSerializer):
-    product_name = serializers.CharField(source='product.name', read_only=True)
 
-    class Meta:
-        model = Wishlist
-        fields = ['id', 'user', 'product', 'product_name', 'created_at']
 
 class AddressSerializer(serializers.ModelSerializer):
     class Meta:
@@ -113,7 +109,13 @@ class ProductCreateSerializer(serializers.ModelSerializer):
             'actual_price', 'offer_price', 'discount_percent'
         ]
 
+class WishlistSerializer(serializers.ModelSerializer):
+    product = ProductSerializer(read_only=True)  # nested serializer to show full product details
 
+    class Meta:
+        model = Wishlist
+        fields = ['id', 'user', 'product', 'created_at']
+        
 ## Set Image 
 class ProductImageSerializer(serializers.ModelSerializer):
     class Meta:

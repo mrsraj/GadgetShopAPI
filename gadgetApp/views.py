@@ -33,11 +33,13 @@ class RegisterView(APIView):
 class LoginView(APIView):
     def post(self, request):
         serializer = LoginSerializer(data=request.data)
+        print("serializer = ",serializer)
         if serializer.is_valid():
             username = serializer.validated_data["username"]
             password = serializer.validated_data["password"]
 
             user = authenticate(username=username, password=password)
+            print("USER = ", user)
             if user:
                 refresh = RefreshToken.for_user(user)
 
@@ -47,6 +49,8 @@ class LoginView(APIView):
                 role = groups[0].name if groups.exists() else "No Role"
 
                 return Response({
+                    "user_id": user.id,
+                    "username":user.first_name,
                     "access": str(refresh.access_token),
                     "refresh": str(refresh),
                     "role": role
@@ -152,7 +156,7 @@ def create_product_image(request):
 ## Cart Function
 
 @api_view(['GET', 'POST'])
-@permission_classes([IsAuthenticated])
+# @permission_classes([IsAuthenticated])
 def cart_list_create(request):
     if request.method == 'GET':
         items = CartItem.objects.all()
@@ -168,35 +172,44 @@ def cart_list_create(request):
 
 
 @api_view(['DELETE'])
-@permission_classes([IsAuthenticated])
+# @permission_classes([IsAuthenticated])
 def cart_delete(request, pk):
     try:
         item = CartItem.objects.get(pk=pk)
     except CartItem.DoesNotExist:
         return Response({'error': 'CartItem not found'}, status=status.HTTP_404_NOT_FOUND)
 
+    serialized_item = CartItemSerializer(item).data 
     item.delete()
-    return Response({'message': 'CartItem deleted'}, status=status.HTTP_204_NO_CONTENT)
+
+    return Response({
+        'message': 'CartItem deleted',
+        'deleted_item': serialized_item
+    }, status=status.HTTP_200_OK)
 
 
 ## WISH LIST VIEWS
 
 @api_view(['GET', 'POST'])
-@permission_classes([IsAuthenticated])
+# @permission_classes([IsAuthenticated])
 def wishlist_list_create(request):
-    if request.method == 'GET':
-        items = Wishlist.objects.all()
-        serializer = WishlistSerializer(items, many=True)
+    
+    user_id = request.data.get('user_id')
+    product = request.data.get('product')
+    
+    if not user_id:
+        return Response({"error": "User ID is required"}, status=status.HTTP_400_BAD_REQUEST)
+    
+    if user_id and not product:
+        wishlist_items = Wishlist.objects.filter(user=user_id).select_related('product')
+        serializer = WishlistSerializer(wishlist_items, many=True)
         return Response(serializer.data)
     
-    elif request.method == 'POST':
+    elif user_id and product:
         print("data=request.data = ", request.data)
         serializer = WishlistSerializer(data=request.data)
 
-        user = request.data.get('user')
-        product = request.data.get('product')
-
-        if Wishlist.objects.filter(user=user, product=product).exists():
+        if Wishlist.objects.filter(user=user_id, product=product).exists():
             return Response({"detail": "Product is already in the wishlist."}, status=status.HTTP_200_OK)
 
         if serializer.is_valid():
@@ -207,7 +220,7 @@ def wishlist_list_create(request):
 
 
 @api_view(['DELETE'])
-@permission_classes([IsAuthenticated]) 
+# @permission_classes([IsAuthenticated]) 
 def wishlist_delete(request, pk):
     try:
         item = Wishlist.objects.get(pk=pk)
