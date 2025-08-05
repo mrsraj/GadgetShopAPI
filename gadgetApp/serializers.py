@@ -116,6 +116,11 @@ class WishlistSerializer(serializers.ModelSerializer):
         model = Wishlist
         fields = ['id', 'user', 'product', 'created_at']
         
+class CreateWishlistSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Wishlist
+        fields = ['user', 'product']
+        
 ## Set Image 
 class ProductImageSerializer(serializers.ModelSerializer):
     class Meta:
