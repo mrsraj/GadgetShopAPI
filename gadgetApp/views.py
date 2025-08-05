@@ -190,26 +190,26 @@ def cart_delete(request, pk):
 
 ## WISH LIST VIEWS
 
-@api_view(['GET', 'POST'])
+@api_view(['POST'])
 # @permission_classes([IsAuthenticated])
 def wishlist_list_create(request):
     
-    user_id = request.data.get('user_id')
+    user = request.data.get('user')
     product = request.data.get('product')
     
-    if not user_id:
+    if not user:
         return Response({"error": "User ID is required"}, status=status.HTTP_400_BAD_REQUEST)
     
-    if user_id and not product:
-        wishlist_items = Wishlist.objects.filter(user=user_id).select_related('product')
+    if user and not product:
+        wishlist_items = Wishlist.objects.filter(user=user).select_related('product')
         serializer = WishlistSerializer(wishlist_items, many=True)
         return Response(serializer.data)
     
-    elif user_id and product:
+    elif user and product:
         print("data=request.data = ", request.data)
-        serializer = WishlistSerializer(data=request.data)
+        serializer = CreateWishlistSerializer(data=request.data)
 
-        if Wishlist.objects.filter(user=user_id, product=product).exists():
+        if Wishlist.objects.filter(user=user, product=product).exists():
             return Response({"detail": "Product is already in the wishlist."}, status=status.HTTP_200_OK)
 
         if serializer.is_valid():
@@ -223,13 +223,17 @@ def wishlist_list_create(request):
 # @permission_classes([IsAuthenticated]) 
 def wishlist_delete(request, pk):
     try:
-        item = Wishlist.objects.get(pk=pk)
+        user = request.data.get('user')
+        item = Wishlist.objects.filter(id=pk, user=user)
+        
+        if not item:
+            return Response({'error': 'Wishlist item not found'}, status=status.HTTP_404_NOT_FOUND)
+        
+        if not user:
+            return Response({'error': 'User id is required'}, status=status.HTTP_404_NOT_FOUND)
+
     except Wishlist.DoesNotExist:
         return Response({'error': 'Wishlist item not found'}, status=status.HTTP_404_NOT_FOUND)
-
-    # Optional: Ensure user can only delete their own wishlist
-    if item.user != request.user:
-        return Response({'error': 'Not authorized'}, status=status.HTTP_403_FORBIDDEN)
 
     item.delete()
     return Response({'message': 'Wishlist item deleted'}, status=status.HTTP_204_NO_CONTENT)
